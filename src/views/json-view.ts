@@ -1,6 +1,6 @@
 import { TextFileView, WorkspaceLeaf } from "obsidian";
 import { basicSetup } from "codemirror";
-import { EditorView } from "@codemirror/view"
+import { EditorView, ViewUpdate } from "@codemirror/view"
 import { json } from "@codemirror/lang-json";
 import { EditorState, Extension } from "@codemirror/state";
 import { VIEW_TYPE_JSON } from '../constants'
@@ -25,7 +25,8 @@ export default class JsonView extends TextFileView {
 		extensions = [
 			basicSetup,
 			getIndentByTabExtension(),
-			json()
+			json(),
+			EditorView.updateListener.of(this.onEditorUpdate.bind(this))
 		]
 		this.cmEditor = new EditorView({
 			state: EditorState.create({
@@ -61,5 +62,11 @@ export default class JsonView extends TextFileView {
 
 	setViewData(data: string, clear: boolean): void {
 		this.cmEditor.dispatch({ changes: { from: 0, to: this.cmEditor.state.doc.length, insert: data } })
+	}
+
+	private onEditorUpdate(update: ViewUpdate): void {
+		if (update.docChanged) {
+			this.requestSave();
+		}
 	}
 }
