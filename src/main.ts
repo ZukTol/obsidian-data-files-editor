@@ -4,24 +4,7 @@ import * as constants from './constants'
 import {path} from "./utils";
 import JsonView from "./views/json-view";
 import TxtView from "./views/txt-view";
-
-interface LoaderPluginSettings {
-	doLoadTxt: boolean;
-	doCreateTxt: boolean;
-	doLoadXml: boolean;
-	doCreateXml: boolean;
-	doLoadJson: boolean;
-	doCreateJson: boolean;
-}
-
-const DEFAULT_SETTINGS: LoaderPluginSettings = {
-	doLoadTxt: true,
-	doCreateTxt: true,
-	doLoadXml: true,
-	doCreateXml: true,
-	doLoadJson: true,
-	doCreateJson: true
-}
+import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
 
 export default class LoaderPlugin extends Plugin {
 	settings: LoaderPluginSettings;

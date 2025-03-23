@@ -67,5 +67,14 @@ export default class LoaderSettingTab extends PluginSettingTab {
 					this.plugin.settings.doCreateXml = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Enable autosave for files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doAutosaveFiles)
+				.onChange(async (value) => {
+					this.plugin.settings.doAutosaveFiles = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 }
