@@ -6,6 +6,7 @@
 	doLoadJson: boolean;
 	doCreateJson: boolean;
 	doAutosaveFiles: boolean;
+	lineWrapping: boolean;
 }
 
 export const DEFAULT_SETTINGS: LoaderPluginSettings = {
@@ -15,5 +16,6 @@ export const DEFAULT_SETTINGS: LoaderPluginSettings = {
 	doCreateXml: true,
 	doLoadJson: true,
 	doCreateJson: true,
-	doAutosaveFiles: true
+	doAutosaveFiles: true,
+	lineWrapping: true
 }

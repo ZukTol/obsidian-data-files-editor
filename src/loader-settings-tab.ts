@@ -76,5 +76,14 @@ export default class LoaderSettingTab extends PluginSettingTab {
 					this.plugin.settings.doAutosaveFiles = value;
 					await this.plugin.saveSettings();
 				}));
+
+		new Setting(containerEl)
+			.setName('Wrap long lines')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.lineWrapping)
+				.onChange(async (value) => {
+					this.plugin.settings.lineWrapping = value;
+					await this.plugin.saveSettings();
+				}));
 	}
 }
