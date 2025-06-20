@@ -19,7 +19,7 @@ export default abstract class BaseView extends TextFileView {
 
 		this.cmEditor = new EditorView({
 			state: EditorState.create({
-				extensions: this.getEditorExtensions()
+				extensions:[...this.getCommonEditorExtensions(), ...this.getEditorExtensions()] 
 			}),
 			parent: this.editorEl,
 		});
@@ -61,4 +61,12 @@ export default abstract class BaseView extends TextFileView {
     abstract getViewType(): string;
 	
 	protected abstract getEditorExtensions(): Extension[];
+
+	private getCommonEditorExtensions(): Extension[]{
+		const extensions: Extension[] = [];
+		if(this.plugin.settings.lineWrapping)
+			extensions.push(EditorView.lineWrapping);
+		
+		return extensions;
+	}
 }
