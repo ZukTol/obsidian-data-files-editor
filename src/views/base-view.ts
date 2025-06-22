@@ -66,7 +66,6 @@ export default abstract class BaseView extends TextFileView {
 		const extensions: Extension[] = [];
 		if(this.plugin.settings.lineWrapping)
 			extensions.push(EditorView.lineWrapping);
-		
 		return extensions;
 	}
 }
