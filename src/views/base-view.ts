@@ -18,23 +18,23 @@ export default abstract class BaseView extends TextFileView {
 		this.editorEl = this.contentEl.createDiv("datafile-source-view mod-cm6");
 
 		this.cmEditor = new EditorView({
-			state: EditorState.create({
-				extensions:[...this.getCommonEditorExtensions(), ...this.getEditorExtensions()] 
-			}),
+			state: this.createDefaultEditorState(),
 			parent: this.editorEl,
 		});
 
 		this.app.workspace.trigger("codemirror", this.cmEditor);
 	}
-	
-    getViewData(): string {
+
+	getViewData(): string {
 		return this.cmEditor.state.doc.toString();
-    }
-    setViewData(data: string, clear: boolean): void {
-		this.cmEditor.dispatch({ changes: { from: 0, to: this.cmEditor.state.doc.length, insert: data } });
-    }
-    clear(): void {
-    }
+	}
+
+	setViewData(data: string, clear: boolean): void {
+		this.cmEditor.dispatch({changes: {from: 0, to: this.cmEditor.state.doc.length, insert: data}});
+	}
+
+	clear(): void {
+	}
 
 	// gets the title of the document
 	getDisplayText(): string {
@@ -47,9 +47,15 @@ export default abstract class BaseView extends TextFileView {
 	onClose(): Promise<void> {
 		return super.onClose();
 	}
+
+	reload(): void {
+		const data = this.getViewData();
+		this.cmEditor.setState(this.createDefaultEditorState());
+		this.setViewData(data, false);
+	}
 	
 	protected onEditorUpdate(update: ViewUpdate): void {
-		if(!this.plugin.settings.doAutosaveFiles) {
+		if (!this.plugin.settings.doAutosaveFiles) {
 			return;
 		}
 
@@ -57,14 +63,20 @@ export default abstract class BaseView extends TextFileView {
 			this.requestSave();
 		}
 	}
-	
-    abstract getViewType(): string;
-	
+
+	abstract getViewType(): string;
+
 	protected abstract getEditorExtensions(): Extension[];
 
-	private getCommonEditorExtensions(): Extension[]{
+	private createDefaultEditorState() {
+		return EditorState.create({
+			extensions: [...this.getCommonEditorExtensions(), ...this.getEditorExtensions()]
+		});
+	}
+
+	private getCommonEditorExtensions(): Extension[] {
 		const extensions: Extension[] = [];
-		if(this.plugin.settings.lineWrapping)
+		if (this.plugin.settings.lineWrapping)
 			extensions.push(EditorView.lineWrapping);
 		return extensions;
 	}

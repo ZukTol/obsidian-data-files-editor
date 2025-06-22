@@ -9,7 +9,7 @@ import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
 export default class LoaderPlugin extends Plugin {
 	settings: LoaderPluginSettings;
 
-	async onload() {
+	async onload(): Promise<void> {
 		await this.loadSettings();
 
 		this.TryRegisterTxt();
@@ -21,8 +21,8 @@ export default class LoaderPlugin extends Plugin {
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new LoaderSettingTab(this.app, this));
 	}
-
-	private TryRegisterTxt() {
+	
+	private TryRegisterTxt(): void {
 		if (this.settings.doLoadTxt) {
 			this.registerView(constants.VIEW_TYPE_TXT, (leaf: WorkspaceLeaf) => new TxtView(leaf, this));
 			this.registerExtensions([constants.EXT_TXT], constants.VIEW_TYPE_TXT);
@@ -32,7 +32,7 @@ export default class LoaderPlugin extends Plugin {
 			this.registerContextMenuCommand(constants.EXT_TXT);
 	}
 
-	private tryRegisterJson() {
+	private tryRegisterJson(): void {
 		if (this.settings.doLoadTxt) {
 			this.registerView(constants.VIEW_TYPE_JSON, (leaf: WorkspaceLeaf) => new JsonView(leaf, this));
 			this.registerExtensions([constants.EXT_JSON], constants.VIEW_TYPE_JSON);
@@ -42,7 +42,7 @@ export default class LoaderPlugin extends Plugin {
 			this.registerContextMenuCommand(constants.EXT_JSON);
 	}
 
-	private tryRegisterXml() {
+	private tryRegisterXml(): void {
 		if (this.settings.doLoadXml)
 			this.registerExtensions([constants.EXT_XML], constants.VIEW_TYPE_TXT);
 
@@ -54,11 +54,11 @@ export default class LoaderPlugin extends Plugin {
 	onunload(): void {
 	}
 
-	async loadSettings() {
+	async loadSettings(): Promise<void> {
 		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
 	}
 
-	async saveSettings() {
+	async saveSettings(): Promise<void> {
 		await this.saveData(this.settings);
 	}
 

@@ -1,8 +1,11 @@
-import { App, PluginSettingTab, Setting } from 'obsidian';
+import {App, PluginSettingTab, Setting} from 'obsidian';
 import LoaderPlugin from './main'
+import {getLoaderViews} from "./utils/obsidian-utils";
 
 export default class LoaderSettingTab extends PluginSettingTab {
 	plugin: LoaderPlugin;
+
+	private requestReloadView: boolean = false;
 
 	constructor(app: App, plugin: LoaderPlugin) {
 		super(app, plugin);
@@ -12,6 +15,7 @@ export default class LoaderSettingTab extends PluginSettingTab {
 	display(): void {
 		const {containerEl} = this;
 
+		this.requestReloadView = false;
 		containerEl.empty();
 
 		new Setting(containerEl)
@@ -83,7 +87,18 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.lineWrapping)
 				.onChange(async (value) => {
 					this.plugin.settings.lineWrapping = value;
+					this.requestReloadView = true;
 					await this.plugin.saveSettings();
 				}));
+	}
+
+	async hide(): Promise<void> {
+		if (this.requestReloadView) {
+			const loaderViews = getLoaderViews(this.app);
+			for (const loaderView of loaderViews) {
+				await loaderView.save(false);
+				loaderView.reload();
+			}
+		}
 	}
 }
