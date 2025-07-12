@@ -48,7 +48,11 @@ export default abstract class BaseView extends TextFileView {
 		return super.onClose();
 	}
 
-	reload(): void {
+	async reload(): Promise<void> {
+		if (this.plugin.settings.doAutosaveFiles) {
+			await this.save(false);
+		}
+		
 		const data = this.getViewData();
 		this.cmEditor.setState(this.createDefaultEditorState());
 		this.setViewData(data, false);
