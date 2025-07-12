@@ -96,8 +96,7 @@ export default class LoaderSettingTab extends PluginSettingTab {
 		if (this.requestReloadView) {
 			const loaderViews = getLoaderViews(this.app);
 			for (const loaderView of loaderViews) {
-				await loaderView.save(false);
-				loaderView.reload();
+				await loaderView.reload();
 			}
 		}
 	}
