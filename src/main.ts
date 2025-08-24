@@ -5,6 +5,7 @@ import {path} from "./utils";
 import JsonView from "./views/json-view";
 import TxtView from "./views/txt-view";
 import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
+import BaseView from "./views/base-view";
 
 export default class LoaderPlugin extends Plugin {
 	settings: LoaderPluginSettings;
@@ -24,7 +25,8 @@ export default class LoaderPlugin extends Plugin {
 	
 	private TryRegisterTxt(): void {
 		if (this.settings.doLoadTxt) {
-			this.registerView(constants.VIEW_TYPE_TXT, (leaf: WorkspaceLeaf) => new TxtView(leaf, this));
+			this.registerViewFactory(TxtView, constants.VIEW_TYPE_TXT);
+			//this.registerView(constants.VIEW_TYPE_TXT, (leaf: WorkspaceLeaf) => new TxtView(leaf, this));
 			this.registerExtensions([constants.EXT_TXT], constants.VIEW_TYPE_TXT);
 		}
 
@@ -34,7 +36,8 @@ export default class LoaderPlugin extends Plugin {
 
 	private tryRegisterJson(): void {
 		if (this.settings.doLoadTxt) {
-			this.registerView(constants.VIEW_TYPE_JSON, (leaf: WorkspaceLeaf) => new JsonView(leaf, this));
+			this.registerViewFactory(JsonView, constants.VIEW_TYPE_JSON);
+			//this.registerView(constants.VIEW_TYPE_JSON, (leaf: WorkspaceLeaf) => new JsonView(leaf, this));
 			this.registerExtensions([constants.EXT_JSON], constants.VIEW_TYPE_JSON);
 		}
 
@@ -49,6 +52,13 @@ export default class LoaderPlugin extends Plugin {
 		if (this.settings.doCreateXml) {
 			this.registerContextMenuCommand(constants.EXT_XML);
 		}
+	}
+
+	private registerViewFactory(
+		View: new (leaf: WorkspaceLeaf, plugin: LoaderPlugin) => BaseView,
+		viewType: string
+	) {
+		this.registerView(viewType, (leaf) => new View(leaf, this));
 	}
 
 	onunload(): void {
