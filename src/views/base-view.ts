@@ -1,7 +1,8 @@
 ﻿import {TextFileView, WorkspaceLeaf} from "obsidian";
 import LoaderPlugin from "../main";
-import {EditorView, ViewUpdate} from "@codemirror/view";
+import {EditorView, KeyBinding, keymap, ViewUpdate} from "@codemirror/view";
 import {EditorState, Extension} from "@codemirror/state";
+import {redo} from "@codemirror/commands"
 
 export default abstract class BaseView extends TextFileView {
 	public plugin: LoaderPlugin;
@@ -82,6 +83,11 @@ export default abstract class BaseView extends TextFileView {
 		const extensions: Extension[] = [];
 		if (this.plugin.settings.lineWrapping)
 			extensions.push(EditorView.lineWrapping);
+		extensions.push(keymap.of(this.customHistoryKeymap));
 		return extensions;
 	}
+	
+	private customHistoryKeymap: readonly KeyBinding[]  = [
+		{ win: "Ctrl-Shift-z", run: redo, preventDefault: true}
+	];
 }
