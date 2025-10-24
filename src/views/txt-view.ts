@@ -1,6 +1,4 @@
 import { WorkspaceLeaf } from "obsidian";
-import { basicSetup } from "codemirror";
-import {EditorView} from "@codemirror/view";
 import {Extension} from "@codemirror/state";
 import { VIEW_TYPE_TXT } from '../constants'
 import LoaderPlugin from "../main";
@@ -19,9 +17,7 @@ export default class TxtView extends BaseView {
 	protected getEditorExtensions(): Extension[] {
 		let extensions: Extension[];
 		extensions = [
-			basicSetup,
-			getInsertTabsExtension(),
-			EditorView.updateListener.of(this.onEditorUpdate.bind(this))
+			getInsertTabsExtension()
 		];
 		return extensions;
 	}

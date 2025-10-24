@@ -1,6 +1,4 @@
 import { WorkspaceLeaf } from "obsidian";
-import { basicSetup } from "codemirror";
-import { EditorView } from "@codemirror/view"
 import { json } from "@codemirror/lang-json";
 import { Extension } from "@codemirror/state";
 import { VIEW_TYPE_JSON } from '../constants'
@@ -20,10 +18,8 @@ export default class JsonView extends BaseView {
     protected getEditorExtensions(): Extension[] {
 		let extensions: Extension[];
 		extensions = [
-			basicSetup,
 			getIndentByTabExtension(),
-			json(),
-			EditorView.updateListener.of(this.onEditorUpdate.bind(this))
+			json()
 		];
 		
 		return extensions;

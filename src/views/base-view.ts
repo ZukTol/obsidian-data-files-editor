@@ -3,6 +3,7 @@ import LoaderPlugin from "../main";
 import {EditorView, KeyBinding, keymap, ViewUpdate} from "@codemirror/view";
 import {EditorState, Extension} from "@codemirror/state";
 import {redo} from "@codemirror/commands"
+import {basicSetup} from "codemirror";
 
 export default abstract class BaseView extends TextFileView {
 	public plugin: LoaderPlugin;
@@ -80,10 +81,13 @@ export default abstract class BaseView extends TextFileView {
 	}
 
 	private getCommonEditorExtensions(): Extension[] {
-		const extensions: Extension[] = [];
+		const extensions: Extension[] = [
+			basicSetup,
+			keymap.of(this.customHistoryKeymap),
+			EditorView.updateListener.of(this.onEditorUpdate.bind(this))
+		];
 		if (this.plugin.settings.lineWrapping)
 			extensions.push(EditorView.lineWrapping);
-		extensions.push(keymap.of(this.customHistoryKeymap));
 		return extensions;
 	}
 	
