@@ -4,6 +4,7 @@ import * as constants from './constants'
 import {path} from "./utils";
 import JsonView from "./views/json-view";
 import TxtView from "./views/txt-view";
+import YamlView from "./views/yaml-view";
 import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
 
 export default class LoaderPlugin extends Plugin {
@@ -17,6 +18,8 @@ export default class LoaderPlugin extends Plugin {
 		this.tryRegisterJson();
 
 		this.tryRegisterXml();
+
+		this.tryRegisterYaml();
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new LoaderSettingTab(this.app, this));
@@ -49,6 +52,15 @@ export default class LoaderPlugin extends Plugin {
 		if (this.settings.doCreateXml) {
 			this.registerContextMenuCommand(constants.EXT_XML);
 		}
+	}
+
+	private tryRegisterYaml(): void {
+		if (this.settings.doLoadYaml) {
+			this.registerView(constants.VIEW_TYPE_YAML, (leaf: WorkspaceLeaf) => new YamlView(leaf, this));
+			this.registerExtensions([constants.EXT_YAML, constants.EXT_YML], constants.VIEW_TYPE_YAML);
+		}
+		if (this.settings.doCreateYaml)
+			this.registerContextMenuCommand(constants.EXT_YAML);
 	}
 
 	onunload(): void {

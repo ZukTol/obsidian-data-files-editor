@@ -73,6 +73,24 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Load .yaml/.yml files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doLoadYaml)
+				.onChange(async (value) => {
+					this.plugin.settings.doLoadYaml = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Create .yaml files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doCreateYaml)
+				.onChange(async (value) => {
+					this.plugin.settings.doCreateYaml = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Enable autosave for files')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.doAutosaveFiles)
