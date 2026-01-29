@@ -1,9 +1,9 @@
 {
 	"id": "data-files-editor",
 	"name": "Data Files Editor",
-	"version": "1.2.1",
+	"version": "1.2.2",
 	"minAppVersion": "0.15.0",
-	"description": "Plugin to edit data files like txt, xml, json",
+	"description": "Plugin to edit data files like txt, xml, json, and yaml",
 	"author": "ZukTol",
 	"authorUrl": "https://github.com/ZukTol",
 	"fundingUrl": "",
