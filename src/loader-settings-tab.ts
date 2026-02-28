@@ -109,6 +109,16 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Auto-prettify JSON/JSONL files on open')
+			.setDesc('When enabled, JSON and JSONL files are displayed formatted. The file on disk is not modified.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.defaultPrettify)
+				.onChange(async (value) => {
+					this.plugin.settings.defaultPrettify = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Enable autosave for files')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.doAutosaveFiles)

@@ -6,6 +6,7 @@ import JsonView from "./views/json-view";
 import JsonlView from "./views/jsonl-view";
 import TxtView from "./views/txt-view";
 import YamlView from "./views/yaml-view";
+import BaseView from "./views/base-view";
 import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
 
 export default class LoaderPlugin extends Plugin {
@@ -23,6 +24,21 @@ export default class LoaderPlugin extends Plugin {
 		this.tryRegisterXml();
 
 		this.tryRegisterYaml();
+
+		this.addCommand({
+			id: 'toggle-prettify',
+			name: 'Toggle prettify for current file',
+			checkCallback: (checking: boolean) => {
+				const view = this.app.workspace.getActiveViewOfType(BaseView);
+				if (view && view.supportsPrettify()) {
+					if (!checking) {
+						view.togglePrettify();
+					}
+					return true;
+				}
+				return false;
+			}
+		});
 
 		// This adds a settings tab so the user can configure various aspects of the plugin
 		this.addSettingTab(new LoaderSettingTab(this.app, this));

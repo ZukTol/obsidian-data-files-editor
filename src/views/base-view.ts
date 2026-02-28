@@ -1,4 +1,4 @@
-﻿import {TextFileView, WorkspaceLeaf} from "obsidian";
+import {TextFileView, WorkspaceLeaf} from "obsidian";
 import LoaderPlugin from "../main";
 import {EditorView, KeyBinding, keymap, ViewUpdate} from "@codemirror/view";
 import {EditorState, Extension} from "@codemirror/state";
@@ -9,10 +9,16 @@ export default abstract class BaseView extends TextFileView {
 	public plugin: LoaderPlugin;
 	protected cmEditor: EditorView;
 	protected editorEl: any;
+	protected isPrettified: boolean = false;
+	private prettifyAction: HTMLElement | null = null;
+	private originalContent: string = '';
+	private hasEditedContent: boolean = false;
+	private suppressEditTracking: boolean = false;
 
 	protected constructor(leaf: WorkspaceLeaf, plugin: LoaderPlugin) {
 		super(leaf);
 		this.plugin = plugin;
+		this.isPrettified = plugin.settings.defaultPrettify && this.supportsPrettify();
 	}
 
 	onload(): void {
@@ -25,14 +31,37 @@ export default abstract class BaseView extends TextFileView {
 		});
 
 		this.app.workspace.trigger("codemirror", this.cmEditor);
+
+		if (this.supportsPrettify()) {
+			this.prettifyAction = this.addAction(
+				'braces',
+				this.isPrettified ? 'Minify (showing formatted)' : 'Prettify (showing raw)',
+				() => { this.togglePrettify(); }
+			);
+			this.updatePrettifyButton();
+		}
 	}
 
 	getViewData(): string {
-		return this.cmEditor.state.doc.toString();
+		const content = this.cmEditor.state.doc.toString();
+		if (this.isPrettified) {
+			if (this.hasEditedContent) {
+				return this.compactContent(content);
+			}
+			return this.originalContent;
+		}
+		return content;
 	}
 
 	setViewData(data: string, clear: boolean): void {
+		this.originalContent = data;
+		this.hasEditedContent = false;
+		if (this.isPrettified) {
+			data = this.prettifyContent(data);
+		}
+		this.suppressEditTracking = true;
 		this.cmEditor.dispatch({changes: {from: 0, to: this.cmEditor.state.doc.length, insert: data}});
+		this.suppressEditTracking = false;
 	}
 
 	clear(): void {
@@ -54,13 +83,17 @@ export default abstract class BaseView extends TextFileView {
 		if (this.plugin.settings.doAutosaveFiles) {
 			await this.save(false);
 		}
-		
+
 		const data = this.getViewData();
 		this.cmEditor.setState(this.createDefaultEditorState());
 		this.setViewData(data, false);
 	}
-	
+
 	protected onEditorUpdate(update: ViewUpdate): void {
+		if (update.docChanged && this.isPrettified && !this.suppressEditTracking) {
+			this.hasEditedContent = true;
+		}
+
 		if (!this.plugin.settings.doAutosaveFiles) {
 			return;
 		}
@@ -73,6 +106,55 @@ export default abstract class BaseView extends TextFileView {
 	abstract getViewType(): string;
 
 	protected abstract getEditorExtensions(): Extension[];
+
+	public supportsPrettify(): boolean {
+		return false;
+	}
+
+	protected prettifyContent(content: string): string {
+		return content;
+	}
+
+	protected compactContent(content: string): string {
+		return content;
+	}
+
+	public togglePrettify(): void {
+		const currentContent = this.cmEditor.state.doc.toString();
+		this.isPrettified = !this.isPrettified;
+
+		let newContent: string;
+		if (this.isPrettified) {
+			// Turning ON: capture current editor content as the original
+			this.originalContent = currentContent;
+			this.hasEditedContent = false;
+			newContent = this.prettifyContent(currentContent);
+		} else {
+			// Turning OFF: restore original if no edits, otherwise compact
+			if (this.hasEditedContent) {
+				newContent = this.compactContent(currentContent);
+			} else {
+				newContent = this.originalContent;
+			}
+			this.hasEditedContent = false;
+		}
+
+		this.suppressEditTracking = true;
+		this.cmEditor.dispatch({
+			changes: {from: 0, to: this.cmEditor.state.doc.length, insert: newContent}
+		});
+		this.suppressEditTracking = false;
+
+		this.updatePrettifyButton();
+	}
+
+	private updatePrettifyButton(): void {
+		if (this.prettifyAction) {
+			this.prettifyAction.setAttribute('aria-label',
+				this.isPrettified ? 'Minify (showing formatted)' : 'Prettify (showing raw)');
+			this.prettifyAction.toggleClass('is-active', this.isPrettified);
+		}
+	}
 
 	private createDefaultEditorState() {
 		return EditorState.create({
@@ -90,7 +172,7 @@ export default abstract class BaseView extends TextFileView {
 			extensions.push(EditorView.lineWrapping);
 		return extensions;
 	}
-	
+
 	private customHistoryKeymap: readonly KeyBinding[]  = [
 		{ win: "Ctrl-Shift-z", run: redo, preventDefault: true}
 	];

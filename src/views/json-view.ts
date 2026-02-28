@@ -14,14 +14,34 @@ export default class JsonView extends BaseView {
 	getViewType(): string {
 		return VIEW_TYPE_JSON;
 	}
-	
+
+	public supportsPrettify(): boolean {
+		return true;
+	}
+
+	protected prettifyContent(content: string): string {
+		try {
+			return JSON.stringify(JSON.parse(content), null, '\t');
+		} catch {
+			return content;
+		}
+	}
+
+	protected compactContent(content: string): string {
+		try {
+			return JSON.stringify(JSON.parse(content));
+		} catch {
+			return content;
+		}
+	}
+
     protected getEditorExtensions(): Extension[] {
 		let extensions: Extension[];
 		extensions = [
 			getIndentByTabExtension(),
 			json()
 		];
-		
+
 		return extensions;
     }
 }

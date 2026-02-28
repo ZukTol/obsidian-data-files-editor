@@ -10,6 +10,7 @@
 	doLoadYaml: boolean;
 	doCreateYaml: boolean;
 	doAutosaveFiles: boolean;
+	defaultPrettify: boolean;
 	lineWrapping: boolean;
 }
 
@@ -25,5 +26,6 @@ export const DEFAULT_SETTINGS: LoaderPluginSettings = {
 	doLoadYaml: true,
 	doCreateYaml: true,
 	doAutosaveFiles: true,
+	defaultPrettify: false,
 	lineWrapping: true
 }
