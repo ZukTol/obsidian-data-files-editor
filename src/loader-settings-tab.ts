@@ -55,6 +55,24 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Load .jsonl files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doLoadJsonl)
+				.onChange(async (value) => {
+					this.plugin.settings.doLoadJsonl = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Create .jsonl files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doCreateJsonl)
+				.onChange(async (value) => {
+					this.plugin.settings.doCreateJsonl = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Load .xml files')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.doLoadXml)
@@ -87,6 +105,16 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				.setValue(this.plugin.settings.doCreateYaml)
 				.onChange(async (value) => {
 					this.plugin.settings.doCreateYaml = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
+			.setName('Auto-prettify JSON/JSONL files on open')
+			.setDesc('When enabled, JSON and JSONL files are displayed formatted. The file on disk is not modified.')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.defaultPrettify)
+				.onChange(async (value) => {
+					this.plugin.settings.defaultPrettify = value;
 					await this.plugin.saveSettings();
 				}));
 
