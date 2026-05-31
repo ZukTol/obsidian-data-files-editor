@@ -4,6 +4,9 @@ import { getLoaderViews } from "./utils/obsidian-utils";
 import { createSettingsGroup } from "./utils/settings-compat";
 
 export default class LoaderSettingTab extends PluginSettingTab {
+	// Shown beside the plugin name in settings search results (Obsidian 1.13)
+	// and in the settings sidebar on older Obsidian (SettingTab.icon).
+	public icon = 'lucide-file-code';
 	plugin: LoaderPlugin;
 
 	private requestReloadView: boolean = false;
@@ -236,6 +239,64 @@ export default class LoaderSettingTab extends PluginSettingTab {
 
 	async hide(): Promise<void> {
 		if (this.requestReloadView) {
+			const loaderViews = getLoaderViews(this.app);
+			for (const loaderView of loaderViews) {
+				await loaderView.reload();
+			}
+		}
+	}
+
+	// Obsidian 1.13.0+: the framework calls this and skips display(); each setting
+	// is then indexed for the global settings search. Pre-1.13.0 ignores it and
+	// display() above runs as before (Path B — both implementations are kept).
+	getSettingDefinitions() {
+		const fileTypes: Array<[string, string, string]> = [
+			['Txt', 'Load .txt files', 'Create .txt files'],
+			['Json', 'Load .json files', 'Create .json files'],
+			['Xml', 'Load .xml files', 'Create .xml files'],
+			['Yaml', 'Load .yaml/.yml files', 'Create .yaml files'],
+			['Html', 'Load .html files', 'Create .html files'],
+			['Css', 'Load .css files', 'Create .css files'],
+			['Js', 'Load .js files', 'Create .js files'],
+			['Mjs', 'Load .mjs files', 'Create .mjs files'],
+			['Ts', 'Load .ts files', 'Create .ts files'],
+			['Astro', 'Load .astro files', 'Create .astro files'],
+		];
+		const fileTypeItems: Array<Record<string, unknown>> = [
+			{
+				name: 'File type loading',
+				desc: 'Toggle which file types this plugin handles. Restart Obsidian for many of these changes to take effect.',
+			},
+		];
+		for (const [cap, loadName, createName] of fileTypes) {
+			fileTypeItems.push({ name: loadName, control: { type: 'toggle' as const, key: `doLoad${cap}` } });
+			fileTypeItems.push({ name: createName, control: { type: 'toggle' as const, key: `doCreate${cap}` } });
+		}
+		return [
+			{ type: 'group' as const, heading: 'File types', items: fileTypeItems },
+			{
+				type: 'group' as const,
+				heading: 'Global settings',
+				items: [
+					{ name: 'Enable autosave for files', control: { type: 'toggle' as const, key: 'doAutosaveFiles' } },
+					{ name: 'Wrap long lines', control: { type: 'toggle' as const, key: 'lineWrapping' } },
+				],
+			},
+		];
+	}
+
+	// Read a setting value by its flat key (Obsidian 1.13 declarative controls).
+	getControlValue(key: string): unknown {
+		return (this.plugin.settings as unknown as Record<string, unknown>)[key];
+	}
+
+	// Persist a declarative control change. Mirrors the display() onChange:
+	// write the value, saveSettings(), and reload open editor views when the
+	// line-wrapping option changes (display() did this via hide()).
+	async setControlValue(key: string, value: unknown): Promise<void> {
+		(this.plugin.settings as unknown as Record<string, unknown>)[key] = value;
+		await this.plugin.saveSettings();
+		if (key === 'lineWrapping') {
 			const loaderViews = getLoaderViews(this.app);
 			for (const loaderView of loaderViews) {
 				await loaderView.reload();
