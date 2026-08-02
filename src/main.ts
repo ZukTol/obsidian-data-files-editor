@@ -49,6 +49,9 @@ export default class LoaderPlugin extends Plugin {
 
 		if (this.settings.doCreateJson)
 			this.registerContextMenuCommand(constants.EXT_JSON);
+
+		if (this.settings.doCreateJsonl)
+			this.registerContextMenuCommand(constants.EXT_JSONL);
 	}
 
 	private tryRegisterXml(): void {
