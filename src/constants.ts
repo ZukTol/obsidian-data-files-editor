@@ -5,6 +5,7 @@ export const VIEW_TYPE_MARKDOWN = "markdown";
 export const VIEW_TYPE_YAML = "yaml";
 
 export const EXT_JSON = "json";
+export const EXT_JSONL = "jsonl";
 export const EXT_XML = "xml";
 export const EXT_TXT = "txt";
 export const EXT_YAML = "yaml";

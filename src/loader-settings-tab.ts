@@ -55,6 +55,15 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
+			.setName('Load .jsonl files')
+			.addToggle(toggle => toggle
+				.setValue(this.plugin.settings.doLoadJsonl)
+				.onChange(async (value) => {
+					this.plugin.settings.doLoadJsonl = value;
+					await this.plugin.saveSettings();
+				}));
+
+		new Setting(containerEl)
 			.setName('Load .xml files')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.doLoadXml)

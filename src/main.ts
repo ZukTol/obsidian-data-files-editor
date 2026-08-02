@@ -36,9 +36,15 @@ export default class LoaderPlugin extends Plugin {
 	}
 
 	private tryRegisterJson(): void {
-		if (this.settings.doLoadTxt) {
+		const extensions: string[] = [];
+		if (this.settings.doLoadJson)
+			extensions.push(constants.EXT_JSON);
+		if (this.settings.doLoadJsonl)
+			extensions.push(constants.EXT_JSONL);
+
+		if (extensions.length > 0) {
 			this.registerView(constants.VIEW_TYPE_JSON, (leaf: WorkspaceLeaf) => new JsonView(leaf, this));
-			this.registerExtensions([constants.EXT_JSON], constants.VIEW_TYPE_JSON);
+			this.registerExtensions(extensions, constants.VIEW_TYPE_JSON);
 		}
 
 		if (this.settings.doCreateJson)
