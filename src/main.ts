@@ -3,6 +3,7 @@ import LoaderSettingTab from './loader-settings-tab';
 import * as constants from './constants'
 import {path} from "./utils";
 import JsonView from "./views/json-view";
+import JsonlView from "./views/jsonl-view";
 import TxtView from "./views/txt-view";
 import YamlView from "./views/yaml-view";
 import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
@@ -16,6 +17,7 @@ export default class LoaderPlugin extends Plugin {
 		this.TryRegisterTxt();
 
 		this.tryRegisterJson();
+		this.tryRegisterJsonl();
 
 		this.tryRegisterXml();
 
@@ -36,19 +38,20 @@ export default class LoaderPlugin extends Plugin {
 	}
 
 	private tryRegisterJson(): void {
-		const extensions: string[] = [];
-		if (this.settings.doLoadJson)
-			extensions.push(constants.EXT_JSON);
-		if (this.settings.doLoadJsonl)
-			extensions.push(constants.EXT_JSONL);
-
-		if (extensions.length > 0) {
+		if (this.settings.doLoadJson) {
 			this.registerView(constants.VIEW_TYPE_JSON, (leaf: WorkspaceLeaf) => new JsonView(leaf, this));
-			this.registerExtensions(extensions, constants.VIEW_TYPE_JSON);
+			this.registerExtensions([constants.EXT_JSON], constants.VIEW_TYPE_JSON);
 		}
 
 		if (this.settings.doCreateJson)
 			this.registerContextMenuCommand(constants.EXT_JSON);
+	}
+
+	private tryRegisterJsonl(): void {
+		if (this.settings.doLoadJsonl) {
+			this.registerView(constants.VIEW_TYPE_JSONL, (leaf: WorkspaceLeaf) => new JsonlView(leaf, this));
+			this.registerExtensions([constants.EXT_JSONL], constants.VIEW_TYPE_JSONL);
+		}
 
 		if (this.settings.doCreateJsonl)
 			this.registerContextMenuCommand(constants.EXT_JSONL);
