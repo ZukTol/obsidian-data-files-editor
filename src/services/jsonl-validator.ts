@@ -12,6 +12,7 @@ interface JsonlWorkerResponse {
 
 interface PendingValidation {
 	id: number;
+	content: string;
 	resolve: (diagnostics: Diagnostic[]) => void;
 	reject: (reason: Error) => void;
 }
@@ -64,9 +65,18 @@ export default class JsonlValidatorWorker {
 	private worker: Worker | null = null;
 	private workerUrl: string | null = null;
 	private pending: PendingValidation | null = null;
+	private pendingPromise: Promise<Diagnostic[]> | null = null;
+	private cachedContent: string | null = null;
+	private cachedDiagnostics: Diagnostic[] = [];
 	private nextRequestId = 0;
 
 	validate(content: string): Promise<Diagnostic[]> {
+		if (content === this.cachedContent)
+			return Promise.resolve(this.cachedDiagnostics);
+
+		if (this.pending?.content === content && this.pendingPromise)
+			return this.pendingPromise;
+
 		if (this.pending)
 			this.stopWorker();
 
@@ -74,10 +84,11 @@ export default class JsonlValidatorWorker {
 			this.startWorker();
 
 		const id = ++this.nextRequestId;
-		return new Promise((resolve, reject) => {
-			this.pending = {id, resolve, reject};
+		this.pendingPromise = new Promise((resolve, reject) => {
+			this.pending = {id, content, resolve, reject};
 			this.worker?.postMessage({id, content} as JsonlWorkerRequest);
 		});
+		return this.pendingPromise;
 	}
 
 	destroy(): void {
@@ -99,14 +110,18 @@ export default class JsonlValidatorWorker {
 			if (!this.pending || event.data.id !== this.pending.id)
 				return;
 
-			const {resolve} = this.pending;
+			const {content, resolve} = this.pending;
+			this.cachedContent = content;
+			this.cachedDiagnostics = event.data.diagnostics;
 			this.pending = null;
+			this.pendingPromise = null;
 			resolve(event.data.diagnostics);
 		};
 		this.worker.onerror = (event: ErrorEvent) => {
 			const error = new Error(event.message || "JSONL validation worker failed");
 			const pending = this.pending;
 			this.pending = null;
+			this.pendingPromise = null;
 			this.releaseWorker();
 			pending?.reject(error);
 		};
@@ -115,6 +130,7 @@ export default class JsonlValidatorWorker {
 	private stopWorker(): void {
 		const pending = this.pending;
 		this.pending = null;
+		this.pendingPromise = null;
 		this.releaseWorker();
 		pending?.resolve([]);
 	}
