@@ -1,41 +1,131 @@
 import { Diagnostic } from "@codemirror/lint";
-import { Text } from "@codemirror/state";
 
-export function getJsonlDiagnostics(doc: Text): Diagnostic[] {
+interface JsonlWorkerRequest {
+	id: number;
+	content: string;
+}
+
+interface JsonlWorkerResponse {
+	id: number;
+	diagnostics: Diagnostic[];
+}
+
+interface PendingValidation {
+	id: number;
+	resolve: (diagnostics: Diagnostic[]) => void;
+	reject: (reason: Error) => void;
+}
+
+export function getJsonlDiagnostics(content: string): Diagnostic[] {
 	const diagnostics: Diagnostic[] = [];
 
-	if (doc.length === 0)
+	if (content.length === 0)
 		return diagnostics;
 
-	for (let lineNumber = 1; lineNumber <= doc.lines; lineNumber++) {
-		const line = doc.line(lineNumber);
-		const isTrailingLine = lineNumber === doc.lines && line.from === doc.length;
+	const lines = content.split("\n");
+	let offset = 0;
+
+	for (let index = 0; index < lines.length; index++) {
+		const line = lines[index];
+		const lineNumber = index + 1;
+		const isTrailingLine = index === lines.length - 1 && line.length === 0;
 
 		if (isTrailingLine)
 			continue;
 
-		if (line.text.trim().length === 0) {
+		if (line.trim().length === 0) {
 			diagnostics.push({
-				from: line.from,
-				to: line.to,
+				from: offset,
+				to: offset + line.length,
 				severity: "error",
 				message: `Line ${lineNumber} is blank. Each JSONL line must contain a JSON value.`
 			});
-			continue;
+		} else {
+			try {
+				JSON.parse(line);
+			} catch (error) {
+				const message = error instanceof Error ? error.message : String(error);
+				diagnostics.push({
+					from: offset,
+					to: offset + line.length,
+					severity: "error",
+					message: `Line ${lineNumber}: ${message}`
+				});
+			}
 		}
 
-		try {
-			JSON.parse(line.text);
-		} catch (error) {
-			const message = error instanceof Error ? error.message : String(error);
-			diagnostics.push({
-				from: line.from,
-				to: line.to,
-				severity: "error",
-				message: `Line ${lineNumber}: ${message}`
-			});
-		}
+		offset += line.length + 1;
 	}
 
 	return diagnostics;
+}
+
+export default class JsonlValidatorWorker {
+	private worker: Worker | null = null;
+	private workerUrl: string | null = null;
+	private pending: PendingValidation | null = null;
+	private nextRequestId = 0;
+
+	validate(content: string): Promise<Diagnostic[]> {
+		if (this.pending)
+			this.stopWorker();
+
+		if (!this.worker)
+			this.startWorker();
+
+		const id = ++this.nextRequestId;
+		return new Promise((resolve, reject) => {
+			this.pending = {id, resolve, reject};
+			this.worker?.postMessage({id, content} as JsonlWorkerRequest);
+		});
+	}
+
+	destroy(): void {
+		this.stopWorker();
+	}
+
+	private startWorker(): void {
+		const workerSource = `
+			const validate = ${getJsonlDiagnostics.toString()};
+			self.onmessage = event => {
+				const { id, content } = event.data;
+				self.postMessage({ id, diagnostics: validate(content) });
+			};
+		`;
+
+		this.workerUrl = URL.createObjectURL(new Blob([workerSource], {type: "text/javascript"}));
+		this.worker = new Worker(this.workerUrl);
+		this.worker.onmessage = (event: MessageEvent<JsonlWorkerResponse>) => {
+			if (!this.pending || event.data.id !== this.pending.id)
+				return;
+
+			const {resolve} = this.pending;
+			this.pending = null;
+			resolve(event.data.diagnostics);
+		};
+		this.worker.onerror = (event: ErrorEvent) => {
+			const error = new Error(event.message || "JSONL validation worker failed");
+			const pending = this.pending;
+			this.pending = null;
+			this.releaseWorker();
+			pending?.reject(error);
+		};
+	}
+
+	private stopWorker(): void {
+		const pending = this.pending;
+		this.pending = null;
+		this.releaseWorker();
+		pending?.resolve([]);
+	}
+
+	private releaseWorker(): void {
+		this.worker?.terminate();
+		this.worker = null;
+
+		if (this.workerUrl) {
+			URL.revokeObjectURL(this.workerUrl);
+			this.workerUrl = null;
+		}
+	}
 }
