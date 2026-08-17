@@ -47,6 +47,7 @@ export default abstract class BaseView extends TextFileView {
 	}
 
 	onClose(): Promise<void> {
+		this.cmEditor.destroy();
 		return super.onClose();
 	}
 
