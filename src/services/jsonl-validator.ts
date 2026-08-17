@@ -105,7 +105,12 @@ export default class JsonlValidatorWorker {
 		`;
 
 		this.workerUrl = URL.createObjectURL(new Blob([workerSource], {type: "text/javascript"}));
-		this.worker = new Worker(this.workerUrl);
+		try {
+			this.worker = new Worker(this.workerUrl);
+		} catch (error) {
+			this.releaseWorker();
+			throw error;
+		}
 		this.worker.onmessage = (event: MessageEvent<JsonlWorkerResponse>) => {
 			if (!this.pending || event.data.id !== this.pending.id)
 				return;
@@ -117,14 +122,18 @@ export default class JsonlValidatorWorker {
 			this.pendingPromise = null;
 			resolve(event.data.diagnostics);
 		};
-		this.worker.onerror = (event: ErrorEvent) => {
-			const error = new Error(event.message || "JSONL validation worker failed");
-			const pending = this.pending;
-			this.pending = null;
-			this.pendingPromise = null;
-			this.releaseWorker();
-			pending?.reject(error);
-		};
+		this.worker.onerror = (event: ErrorEvent) =>
+			this.rejectPending(new Error(event.message || "JSONL validation worker failed"));
+		this.worker.onmessageerror = () =>
+			this.rejectPending(new Error("JSONL validation worker returned an unreadable response"));
+	}
+
+	private rejectPending(error: Error): void {
+		const pending = this.pending;
+		this.pending = null;
+		this.pendingPromise = null;
+		this.releaseWorker();
+		pending?.reject(error);
 	}
 
 	private stopWorker(): void {
