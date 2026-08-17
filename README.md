@@ -1,7 +1,7 @@
 # Obsidian Data Files editor plugin
 ![Release workflow status](https://github.com/ZukTol/obsidian-data-files-editor/actions/workflows/release.yml/badge.svg) ![GitHub release (latest SemVer)](https://img.shields.io/github/v/release/ZukTol/obsidian-data-files-editor?style=plastic&sort=semver)
 
-This plugin adds ability to create and edit files of types: `.txt`, `.json`, `.xml` in Obsidian (https://obsidian.md)
+This plugin adds ability to create and edit files of types: `.txt`, `.json`, `.jsonl`, `.xml`, `.yaml`, and `.yml` in Obsidian (https://obsidian.md)
 
 ## Installation
 1. Open Settings > Third-party plugin

@@ -5,6 +5,8 @@
 	doCreateXml: boolean;
 	doLoadJson: boolean;
 	doCreateJson: boolean;
+	doLoadJsonl: boolean;
+	doCreateJsonl: boolean;
 	doLoadYaml: boolean;
 	doCreateYaml: boolean;
 	doAutosaveFiles: boolean;
@@ -18,6 +20,8 @@ export const DEFAULT_SETTINGS: LoaderPluginSettings = {
 	doCreateXml: true,
 	doLoadJson: true,
 	doCreateJson: true,
+	doLoadJsonl: true,
+	doCreateJsonl: true,
 	doLoadYaml: true,
 	doCreateYaml: true,
 	doAutosaveFiles: true,
