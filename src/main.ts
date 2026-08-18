@@ -59,7 +59,7 @@ export default class LoaderPlugin extends Plugin {
 
 	private tryRegisterXml(): void {
 		if (this.settings.doLoadXml)
-			this.registerExtensions([constants.EXT_XML], constants.VIEW_TYPE_TXT);
+			this.registerExtensions([constants.EXT_XML, constants.EXT_XSD], constants.VIEW_TYPE_TXT);
 
 		if (this.settings.doCreateXml) {
 			this.registerContextMenuCommand(constants.EXT_XML);

@@ -73,7 +73,7 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 
 		new Setting(containerEl)
-			.setName('Load .xml files')
+			.setName('Load .xml/.xsd files')
 			.addToggle(toggle => toggle
 				.setValue(this.plugin.settings.doLoadXml)
 				.onChange(async (value) => {
