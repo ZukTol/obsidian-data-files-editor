@@ -1,5 +1,5 @@
 ﻿import {keymap} from "@codemirror/view";
-import {indentLess, indentWithTab, insertTab} from "@codemirror/commands";
+import {indentLess, indentWithTab} from "@codemirror/commands";
 import {Extension} from "@codemirror/state";
 import {indentUnit} from "@codemirror/language";
 

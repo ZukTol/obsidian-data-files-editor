@@ -35,8 +35,8 @@ let character_width_listener = EditorView.updateListener.of((viewupdate) => {
 	let current_width = viewupdate.view.state.field(extra_cycle_character_width, false)
 
 	if (current_width !== width) {
-		console.log(`current_width:`, current_width)
-		console.log(`width:`, width)
+		// console.log(`current_width:`, current_width)
+		// console.log(`width:`, width)
 		current_width = width
 		viewupdate.view.dispatch({
 			effects: [CharacterWidthEffect.of(current_width)],
