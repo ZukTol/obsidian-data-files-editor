@@ -8,7 +8,7 @@ import {basicSetup} from "codemirror";
 export default abstract class BaseView extends TextFileView {
 	public plugin: LoaderPlugin;
 	protected cmEditor: EditorView;
-	protected editorEl: any;
+	protected editorEl: HTMLDivElement;
 
 	protected constructor(leaf: WorkspaceLeaf, plugin: LoaderPlugin) {
 		super(leaf);
@@ -85,7 +85,7 @@ export default abstract class BaseView extends TextFileView {
 		const extensions: Extension[] = [
 			basicSetup,
 			keymap.of(this.customHistoryKeymap),
-			EditorView.updateListener.of(this.onEditorUpdate.bind(this))
+			EditorView.updateListener.of((update: ViewUpdate) => this.onEditorUpdate(update))
 		];
 		if (this.plugin.settings.lineWrapping)
 			extensions.push(EditorView.lineWrapping);

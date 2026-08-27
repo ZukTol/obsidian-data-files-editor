@@ -86,7 +86,8 @@ export default class JsonlValidatorWorker {
 		const id = ++this.nextRequestId;
 		this.pendingPromise = new Promise((resolve, reject) => {
 			this.pending = {id, content, resolve, reject};
-			this.worker?.postMessage({id, content} as JsonlWorkerRequest);
+			const request: JsonlWorkerRequest = {id, content};
+			this.worker?.postMessage(request);
 		});
 		return this.pendingPromise;
 	}

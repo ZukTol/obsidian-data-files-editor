@@ -1,4 +1,4 @@
-import {Plugin, TFile, WorkspaceLeaf} from 'obsidian';
+import {Notice, Plugin, TFile, WorkspaceLeaf} from 'obsidian';
 import LoaderSettingTab from './loader-settings-tab';
 import * as constants from './constants'
 import {path} from "./utils";
@@ -11,20 +11,20 @@ import {DEFAULT_SETTINGS, LoaderPluginSettings} from "./loader-plugin-settings";
 export default class LoaderPlugin extends Plugin {
 	settings: LoaderPluginSettings;
 
-	async onload(): Promise<void> {
-		await this.loadSettings();
+	onload(): void {
+		void this.loadSettings().then(() => {
+			this.TryRegisterTxt();
 
-		this.TryRegisterTxt();
+			this.tryRegisterJson();
+			this.tryRegisterJsonl();
 
-		this.tryRegisterJson();
-		this.tryRegisterJsonl();
+			this.tryRegisterXml();
 
-		this.tryRegisterXml();
+			this.tryRegisterYaml();
 
-		this.tryRegisterYaml();
-
-		// This adds a settings tab so the user can configure various aspects of the plugin
-		this.addSettingTab(new LoaderSettingTab(this.app, this));
+			// This adds a settings tab so the user can configure various aspects of the plugin
+			this.addSettingTab(new LoaderSettingTab(this.app, this));
+		});
 	}
 	
 	private TryRegisterTxt(): void {
@@ -79,7 +79,12 @@ export default class LoaderPlugin extends Plugin {
 	}
 
 	async loadSettings(): Promise<void> {
-		this.settings = Object.assign({}, DEFAULT_SETTINGS, await this.loadData());
+		const loadedSettings: unknown = await this.loadData();
+		this.settings = Object.assign(
+			{},
+			DEFAULT_SETTINGS,
+			loadedSettings && typeof loadedSettings === "object" ? loadedSettings : {}
+		);
 	}
 
 	async saveSettings(): Promise<void> {
@@ -96,7 +101,6 @@ export default class LoaderPlugin extends Plugin {
 						.setTitle(`Create .${fileExt} file`)
 						.setIcon("document")
 						.onClick(async () => {
-							console.log(parent?.path);
 							if (parent)
 								await this.createFile(parent.path, fileExt);
 						});
@@ -120,7 +124,7 @@ export default class LoaderPlugin extends Plugin {
 			const leaf = this.app.workspace.getLeaf(true);
 			await leaf.openFile(File);
 		} catch (error) {
-			console.log(error.toString());
+			new Notice(error instanceof Error ? error.message : String(error));
 		}
 	}
 }
