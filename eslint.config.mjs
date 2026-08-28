@@ -18,10 +18,15 @@ export default defineConfig([
       },
     },
     rules: {
-      "no-unused-vars": "off",
+      "no-prototype-builtins": "off",
+      "obsidianmd/settings-tab/prefer-setting-definitions": "off",
+    },
+  },
+  {
+    files: ["**/*.{ts,tsx,cts,mts}"],
+    rules: {
       "@typescript-eslint/no-unused-vars": ["error", { args: "none" }],
       "@typescript-eslint/ban-ts-comment": "off",
-      "no-prototype-builtins": "off",
       "@typescript-eslint/no-empty-function": "off",
     },
   },
