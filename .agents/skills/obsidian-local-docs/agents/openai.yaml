@@ -1,0 +1,4 @@
+interface:
+  display_name: "Obsidian Local Docs"
+  short_description: "Develop plugins using local Obsidian API documentation"
+  default_prompt: "Use $obsidian-local-docs to develop this feature against the local Obsidian API documentation and applicable development guides."

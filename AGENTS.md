@@ -3,6 +3,11 @@
 
 # Repository Guide
 
+## Obsidian Documentation
+
+- When changing Obsidian API usage or plugin behavior, writing a feature specification, or reviewing such changes, use the `obsidian-local-docs` skill in `.agents/skills/obsidian-local-docs/SKILL.md`.
+- The skill's `references/documentation.md` identifies the local documentation vault and relevant sections. Read the sections needed for the task and cite sources for material API constraints.
+
 ## Commands
 
 - Use npm; the repository has a lockfile and the release workflow runs on Node 20.
