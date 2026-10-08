@@ -32,10 +32,16 @@ export default abstract class BaseView extends TextFileView {
 	}
 
 	setViewData(data: string, clear: boolean): void {
+		if (clear) {
+			this.cmEditor.setState(this.createDefaultEditorState(data));
+			return;
+		}
+
 		this.cmEditor.dispatch({changes: {from: 0, to: this.cmEditor.state.doc.length, insert: data}});
 	}
 
 	clear(): void {
+		this.cmEditor.setState(this.createDefaultEditorState());
 	}
 
 	// gets the title of the document
@@ -75,8 +81,9 @@ export default abstract class BaseView extends TextFileView {
 
 	protected abstract getEditorExtensions(): Extension[];
 
-	private createDefaultEditorState() {
+	private createDefaultEditorState(data: string = "") {
 		return EditorState.create({
+			doc: data,
 			extensions: [...this.getCommonEditorExtensions(), ...this.getEditorExtensions()]
 		});
 	}
