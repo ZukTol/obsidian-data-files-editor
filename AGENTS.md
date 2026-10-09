@@ -28,7 +28,7 @@
 
 - `src/main.ts` is the only bundle entrypoint. It loads persisted settings, registers Obsidian file views/extensions, and adds file-menu creation commands.
 - `src/views/base-view.ts` adapts Obsidian `TextFileView` persistence to an embedded CodeMirror 6 `EditorView`; JSON and YAML add language support, while XML deliberately reuses the TXT view rather than having its own view class.
-- Load/create settings are consumed when `onload()` registers handlers. Changing those toggles only persists data; reload the plugin before expecting registration changes. Line wrapping is different: closing the settings tab rebuilds currently open plugin views.
+- Load/create settings are consumed when `onload()` registers handlers. Changing those toggles only persists data; reload the plugin before expecting registration changes. Line wrapping is different: closing the settings tab reconfigures currently open plugin views, preserving editor content, selection, and undo/redo history.
 - Keep format registration gates independent: `tryRegisterJson()` checks `doLoadJson`, while TXT registration checks `doLoadTxt`.
 - `data.json` is ignored runtime state from Obsidian. Defaults and the persisted shape belong in `src/loader-plugin-settings.ts`.
 

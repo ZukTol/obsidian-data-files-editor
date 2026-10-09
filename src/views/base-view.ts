@@ -1,7 +1,7 @@
 ﻿import {TextFileView, WorkspaceLeaf} from "obsidian";
 import LoaderPlugin from "../main";
 import {EditorView, KeyBinding, keymap, ViewUpdate} from "@codemirror/view";
-import {EditorState, Extension} from "@codemirror/state";
+import {Compartment, EditorState, Extension} from "@codemirror/state";
 import {redo} from "@codemirror/commands"
 import {basicSetup} from "codemirror";
 
@@ -9,6 +9,7 @@ export default abstract class BaseView extends TextFileView {
 	public plugin: LoaderPlugin;
 	protected cmEditor: EditorView;
 	protected editorEl: HTMLDivElement;
+	private readonly lineWrappingCompartment = new Compartment();
 
 	protected constructor(leaf: WorkspaceLeaf, plugin: LoaderPlugin) {
 		super(leaf);
@@ -57,14 +58,10 @@ export default abstract class BaseView extends TextFileView {
 		return super.onClose();
 	}
 
-	async reload(): Promise<void> {
-		if (this.plugin.settings.doAutosaveFiles) {
-			await this.save(false);
-		}
-		
-		const data = this.getViewData();
-		this.cmEditor.setState(this.createDefaultEditorState());
-		this.setViewData(data, false);
+	reload(): void {
+		this.cmEditor.dispatch({
+			effects: this.lineWrappingCompartment.reconfigure(this.getLineWrappingExtension())
+		});
 	}
 	
 	protected onEditorUpdate(update: ViewUpdate): void {
@@ -92,11 +89,14 @@ export default abstract class BaseView extends TextFileView {
 		const extensions: Extension[] = [
 			basicSetup,
 			keymap.of(this.customHistoryKeymap),
-			EditorView.updateListener.of((update: ViewUpdate) => this.onEditorUpdate(update))
+			EditorView.updateListener.of((update: ViewUpdate) => this.onEditorUpdate(update)),
+			this.lineWrappingCompartment.of(this.getLineWrappingExtension())
 		];
-		if (this.plugin.settings.lineWrapping)
-			extensions.push(EditorView.lineWrapping);
 		return extensions;
+	}
+
+	private getLineWrappingExtension(): Extension {
+		return this.plugin.settings.lineWrapping ? EditorView.lineWrapping : [];
 	}
 	
 	private customHistoryKeymap: readonly KeyBinding[]  = [

@@ -1,5 +1,5 @@
 import {strict as assert} from "node:assert";
-import {redo, redoDepth, undo, undoDepth} from "@codemirror/commands";
+import {isolateHistory, redo, redoDepth, undo, undoDepth} from "@codemirror/commands";
 import {EditorState, Extension, Transaction, TransactionSpec} from "@codemirror/state";
 import {EditorView} from "@codemirror/view";
 import {DEFAULT_SETTINGS} from "../src/loader-plugin-settings";
@@ -22,6 +22,7 @@ class HeadlessEditor {
 
 class TestView extends BaseView {
 	readonly editor = new HeadlessEditor();
+	saveCalls = 0;
 
 	constructor() {
 		super(null as never, {settings: {...DEFAULT_SETTINGS}} as never);
@@ -32,9 +33,19 @@ class TestView extends BaseView {
 		return "test-data-file";
 	}
 
+	async save(clear?: boolean): Promise<void> {
+		this.saveCalls++;
+		await super.save(clear);
+	}
+
 	protected getEditorExtensions(): Extension[] {
 		return [];
 	}
+}
+
+function hasLineWrapping(editor: HeadlessEditor): boolean {
+	return editor.state.facet(EditorView.contentAttributes).some(attributes =>
+		typeof attributes !== "function" && attributes.class === "cm-lineWrapping");
 }
 
 function run(): void {
@@ -73,6 +84,46 @@ function run(): void {
 	view.editor.dispatch({changes: {from: 6, insert: " edited"}});
 	assert.equal(undo(view.editor), true, "the editor remains usable after clearing");
 	assert.equal(view.getViewData(), "File D");
+
+	for (const doAutosaveFiles of [false, true]) {
+		for (const lineWrapping of [false, true]) {
+			const wrappingView = new TestView();
+			wrappingView.plugin.settings.doAutosaveFiles = doAutosaveFiles;
+			wrappingView.plugin.settings.lineWrapping = lineWrapping;
+			wrappingView.setViewData("Original", true);
+			assert.equal(hasLineWrapping(wrappingView.editor), lineWrapping);
+			wrappingView.editor.dispatch({
+				changes: {from: 8, insert: " first"},
+				annotations: isolateHistory.of("full")
+			});
+			wrappingView.editor.dispatch({
+				changes: {from: 14, insert: " second"},
+				annotations: isolateHistory.of("full")
+			});
+			assert.equal(undo(wrappingView.editor), true);
+			wrappingView.editor.dispatch({selection: {anchor: 1, head: 5}});
+			const selection = wrappingView.editor.state.selection;
+
+			for (const enabled of [!lineWrapping, lineWrapping, !lineWrapping]) {
+				wrappingView.plugin.settings.lineWrapping = enabled;
+				wrappingView.reload();
+				assert.equal(hasLineWrapping(wrappingView.editor), enabled, "applies the wrapping setting");
+				assert.equal(wrappingView.getViewData(), "Original first", "wrapping preserves unsaved text");
+				assert.ok(wrappingView.editor.state.selection.eq(selection), "wrapping preserves selection");
+				assert.equal(undoDepth(wrappingView.editor.state), 1, "wrapping preserves undo history");
+				assert.equal(redoDepth(wrappingView.editor.state), 1, "wrapping preserves redo history");
+				assert.equal(wrappingView.saveCalls, 0, "changing presentation does not save the file");
+			}
+
+			assert.equal(redo(wrappingView.editor), true);
+			assert.equal(wrappingView.getViewData(), "Original first second");
+			assert.equal(undo(wrappingView.editor), true);
+			assert.equal(wrappingView.getViewData(), "Original first");
+			assert.equal(undo(wrappingView.editor), true);
+			assert.equal(wrappingView.getViewData(), "Original", "undo returns to the original text, not an empty document");
+			assert.equal(undo(wrappingView.editor), false, "no wrapping transaction is added to undo history");
+		}
+	}
 
 	console.log("Base view history tests passed");
 }

@@ -128,11 +128,11 @@ export default class LoaderSettingTab extends PluginSettingTab {
 				}));
 	}
 
-	async hide(): Promise<void> {
+	hide(): void {
 		if (this.requestReloadView) {
 			const loaderViews = getLoaderViews(this.app);
 			for (const loaderView of loaderViews) {
-				await loaderView.reload();
+				loaderView.reload();
 			}
 		}
 	}
