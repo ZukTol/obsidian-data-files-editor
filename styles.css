@@ -1,12 +1,3 @@
-/*
-
-This CSS file will be included with your plugin, and
-available in the app when your plugin is enabled.
-
-If your plugin does not need CSS, delete this file.
-
-*/
-
 .datafile-source-view.mod-cm6 .cm-gutters {
 	flex: 0 0 auto;
 	background-color: transparent;
@@ -18,6 +9,38 @@ If your plugin does not need CSS, delete this file.
 	font-variant: tabular-nums;
 }
 
-.cm-gutterElement.cm-activeLineGutter {
-	background-color: #aaeeff44;
+.datafile-source-view.mod-cm6 .cm-gutterElement.cm-activeLineGutter {
+	background-color: var(--background-modifier-hover);
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-property {
+	color: var(--code-property, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-string {
+	color: var(--code-string, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-value {
+	color: var(--code-value, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-comment {
+	color: var(--code-comment, var(--text-muted));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-normal {
+	color: var(--code-normal, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-keyword {
+	color: var(--code-keyword, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-punctuation {
+	color: var(--code-punctuation, var(--text-normal));
+}
+
+.datafile-source-view.mod-cm6 .datafile-yaml-tag {
+	color: var(--code-tag, var(--text-normal));
 }

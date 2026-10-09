@@ -5,7 +5,7 @@ import path from "node:path";
 const require = createRequire(import.meta.url);
 const obsidianMockPath = path.resolve("tests/obsidian-mock.ts");
 
-for (const entryPoint of ["tests/base-view.test.ts", "tests/jsonl-validator.test.ts", "tests/format-registration.test.ts"]) {
+for (const entryPoint of ["tests/base-view.test.ts", "tests/jsonl-validator.test.ts", "tests/format-registration.test.ts", "tests/yaml-highlighting.test.ts"]) {
 	const result = await build({
 		entryPoints: [entryPoint],
 		bundle: true,

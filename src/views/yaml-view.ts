@@ -8,13 +8,15 @@ import LoaderPlugin from "../main";
 import { getIndentByTabExtension } from "../services/indentation-provider"
 import BaseView from "./base-view";
 
-const yamlDarkHighlight = HighlightStyle.define([
-	{ tag: tags.propertyName, color: "#e5c07b" },  // keys - warm yellow/gold
-	{ tag: tags.string, color: "#98c379" },         // string values - green
-	{ tag: tags.number, color: "#d19a66" },         // numbers - orange
-	{ tag: tags.bool, color: "#d19a66" },           // booleans - orange
-	{ tag: tags.null, color: "#d19a66" },           // null - orange
-	{ tag: tags.comment, color: "#7f848e" },        // comments - gray
+const yamlHighlight = HighlightStyle.define([
+	{ tag: tags.propertyName, class: "datafile-yaml-property" },
+	{ tag: tags.string, class: "datafile-yaml-string" },
+	{ tag: [tags.number, tags.bool, tags.null, tags.attributeValue], class: "datafile-yaml-value" },
+	{ tag: tags.comment, class: "datafile-yaml-comment" },
+	{ tag: tags.content, class: "datafile-yaml-normal" },
+	{ tag: tags.keyword, class: "datafile-yaml-keyword" },
+	{ tag: tags.punctuation, class: "datafile-yaml-punctuation" },
+	{ tag: [tags.labelName, tags.typeName, tags.meta], class: "datafile-yaml-tag" },
 ]);
 
 export default class YamlView extends BaseView {
@@ -26,16 +28,11 @@ export default class YamlView extends BaseView {
 		return VIEW_TYPE_YAML;
 	}
 
-    protected getEditorExtensions(): Extension[] {
-		const extensions: Extension[] = [
+	protected getEditorExtensions(): Extension[] {
+		return [
 			getIndentByTabExtension(),
-			yaml()
+			yaml(),
+			syntaxHighlighting(yamlHighlight)
 		];
-
-		if (document.body.classList.contains('theme-dark')) {
-			extensions.push(syntaxHighlighting(yamlDarkHighlight));
-		}
-
-		return extensions;
-    }
+	}
 }
