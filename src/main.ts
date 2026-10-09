@@ -28,10 +28,11 @@ export default class LoaderPlugin extends Plugin {
 	}
 	
 	private TryRegisterTxt(): void {
-		if (this.settings.doLoadTxt) {
+		if (this.settings.doLoadTxt || this.settings.doLoadXml)
 			this.registerView(constants.VIEW_TYPE_TXT, (leaf: WorkspaceLeaf) => new TxtView(leaf, this));
+
+		if (this.settings.doLoadTxt)
 			this.registerExtensions([constants.EXT_TXT], constants.VIEW_TYPE_TXT);
-		}
 
 		if (this.settings.doCreateTxt)
 			this.registerContextMenuCommand(constants.EXT_TXT);
