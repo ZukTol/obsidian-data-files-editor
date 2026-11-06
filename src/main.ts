@@ -112,13 +112,11 @@ export default class LoaderPlugin extends Plugin {
 
 	private async createFile(dirPath: string, extension: string): Promise<void> {
 		const {vault} = this.app;
-		const {adapter} = vault;
 		const name = "Unknown";
 		const filePath = path.join(dirPath, `${name}.${extension}`);
 
 		try {
-			const fileExists = await adapter.exists(filePath);
-			if (fileExists)
+			if (vault.getAbstractFileByPath(filePath))
 				throw new Error(`${filePath} already exists`);
 
 			const File = await vault.create(filePath, '');
