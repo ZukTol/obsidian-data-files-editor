@@ -1,32 +1,42 @@
 schema: spec-driven
 
-# Project context (optional)
-# Add only constraints that should guide OpenSpec artifacts and workflows.
-# Include constraints an agent cannot infer by reading the code.
-# Keep general project documentation and discoverable codebase facts out.
-# Example:
-#   context: |
-#     Designs and tasks must cover Windows, macOS, and Linux
-#     Write all artifacts in Spanish
+context: |
+  Language: English
+  Keep required OpenSpec structural headings and SHALL/MUST/WHEN/AND keywords in English.
+  Put a short English explanation below a required heading; do not alter its exact title.
+  Wrap ordinary prose in all artifacts at 100 characters per physical line, including indentation.
+  Preserve Markdown semantics; indent wrapped list continuations appropriately.
+  Do not split URLs, Markdown links, inline code, identifiers or literal values to meet the limit.
+  Unbreakable elementsm structural headings, table rows and fenced code may exceed the limit.
+  Baselin specs describe the implementation contract; reports state actual test coverage and limits.
+  Use AGENTS.md for the information how to work with project.
 
-# Per-artifact rules (optional)
-# Add custom rules for specific artifacts.
-# Example:
-#   rules:
-#     proposal:
-#       - Keep proposals under 500 words
-#       - Always state what is out of scope
-#     tasks:
-#       - Break tasks into chunks of max 2 hours
+rules:
+  proposal:
+    - Describe the user-visible problem, affected capabilities and compatibility impact.
+    - Distinguish observed behavior from changes.
+    - Always state what is out of scope.
+  specs:
+    - Write requirement and scenario prose in English, preserving required OpenSpec syntax.
+    - Wrap ordinary prose at 100 characters per physical line using the context exceptions.
+    - Specify observable inputs, outputs, failures and testable WHEN/THEN scenarios.
+    - Reuse existing capability names and keep requirement descriptions within 500 characters.
+    - Do not silently strengthen the current contract or present a planned feature as implemented.
+  design:
+    - Do not invent infrastructure details that are unavailable
+  tasks:
+    - Break tasks into chunks of max 2 hours
+    - Each task includes its verification and necessary documentation update.
+    - Historical test results are not a fresh run.
 
-# Per-operation guidance (optional)
-# Add advisory guidance for how apply and archive work should be conducted.
-# This is separate from artifact rules above.
-# Example:
-#   operations:
-#     apply:
-#       guidance:
-#         - Keep test summaries concise
-#     archive:
-#       guidance:
-#         - Summarize the archive outcome before finishing
+operations:
+  apply:
+    guidance:
+      - Keep test summaries concise
+      - Read the change and affected main specs before implementation; preserve unrelated edits.
+      - Use cached dependencies and offline checks unless network use is authorized.
+  archive:
+    guidance:
+      - Summarize the archive outcome before finishing
+      - Verify tasks and implementation, record actual checks and limitations, then synchronize deltas.
+      - Never archive incomplete implementation as successfully delivered.
